@@ -1,3 +1,14 @@
+import {
+  layoutTemplates,
+  searchTemplates,
+  productTemplates,
+  commonTemplates,
+  // cartTemplates,
+  // detailTemplates,
+  // notFoundTemplates,
+} from "./templates/index.js";
+import { getProducts, getCategories } from "./api/productApi.js";
+
 const enableMocking = () =>
   import("./mocks/browser.js").then(({ worker }) =>
     worker.start({
@@ -5,8 +16,121 @@ const enableMocking = () =>
     }),
   );
 
+// 전역 상태
+const state = {
+  products: [],
+  categories: [],
+  cart: [],
+  filters: {
+    search: "",
+    categories: [],
+    isSubItem: false,
+    limit: 20,
+    sort: "price_asc",
+  },
+  currentPage: 1,
+  totalCount: 0,
+  hasMore: true,
+  isLoading: false,
+};
+
+// ===== 초기화 =====
+function initMain() {
+  init();
+}
+
+async function init() {
+  try {
+    renderLoading();
+
+    await Promise.all([loadCategories(), loadProducts()]);
+
+    renderProductList();
+
+    addInitEventListeners();
+  } catch (error) {
+    console.error("초기화 실패:", error);
+    renderError("데이터를 불러오는데 실패했습니다.");
+  }
+}
+
+// ===== 데이터 로딩 =====
+async function loadProducts(append = false) {
+  if (state.isLoading) return;
+
+  state.isLoading = true;
+
+  try {
+    const response = await getProducts({
+      page: state.currentPage,
+      limit: state.filters.limit,
+      search: state.filters.search,
+      category1: state.filters.category1,
+      category2: state.filters.category2,
+      sort: state.filters.sort,
+    });
+
+    // 데이터 업데이트
+    if (append) {
+      state.products = [...state.products, ...response.products];
+    } else {
+      state.products = response.products;
+    }
+
+    state.totalCount = response.pagination.total;
+    state.hasMore = response.hasMore;
+
+    console.log("상품 로드 완료:", state.products.length, "개");
+  } catch (error) {
+    console.error("상품 로딩 실패:", error);
+    throw error;
+  } finally {
+    state.isLoading = false;
+  }
+}
+
+async function loadCategories() {
+  try {
+    const response = await getCategories();
+    state.categories = response;
+    state.filters.categories = Object.keys(response);
+    state.filters.isSubItem = false;
+    console.log("카테고리 로드 완료:", state.categories.length, "개");
+  } catch (error) {
+    console.error("카테고리 로딩 실패:", error);
+  }
+}
+
+function renderLoading() {
+  const content = searchTemplates.filterBox() + commonTemplates.skeleton();
+  document.body.innerHTML = layoutTemplates.page(content);
+}
+
+function renderProductList() {
+  const content = `
+    ${searchTemplates.filterBox(state.filters)}
+    ${productTemplates.count(state.totalCount)}
+    ${productTemplates.list(state.products)}
+  `;
+  document.body.innerHTML = layoutTemplates.page(content, state.cart.length);
+}
+
+function renderError(message) {
+  const content = commonTemplates.error(message);
+  document.body.innerHTML = layoutTemplates.page(content);
+}
+
+// ===== 이벤트 리스너 =====
+function addInitEventListeners() {
+  console.log("이벤트 리스너 등록");
+  // TODO: 이벤트 리스너 구현
+}
+
 function main() {
-  const 상품목록_레이아웃_로딩 = `
+  // 템플릿 사용 예시
+  console.log("템플릿이 로드되었습니다!");
+
+  const 상품목록_레이아웃_로딩 = /* html */ `
     <div class="min-h-screen bg-gray-50">
       <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-md mx-auto px-4 py-4">
@@ -1146,7 +1270,7 @@ function main() {
 
 // 애플리케이션 시작
 if (import.meta.env.MODE !== "test") {
-  enableMocking().then(main);
+  enableMocking().then(() => initMain());
 } else {
   main();
 }
