@@ -7,7 +7,7 @@ export const productTemplates = {
       <div class="aspect-square bg-gray-100 overflow-hidden cursor-pointer product-image">
         <img src="${product.image}"
              alt="${product.title}"
-             class="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+             class="product-image w-full h-full object-cover hover:scale-105 transition-transform duration-200"
              loading="lazy">
       </div>
       <!-- 상품 정보 -->

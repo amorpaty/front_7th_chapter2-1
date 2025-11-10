@@ -30,8 +30,8 @@ export const notFoundTemplates = {
         <!-- Subtle bottom accent -->
         <rect x="130" y="130" width="60" height="2" rx="1" fill="url(#blueGradient)" opacity="0.3"/>
       </svg>
-      
-      <a href="/" data-link class="inline-block px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+
+      <a href="/" data-link id="back-home" class="inline-block px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
         홈으로
       </a>
     </div>

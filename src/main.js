@@ -4,10 +4,10 @@ import {
   productTemplates,
   commonTemplates,
   // cartTemplates,
-  // detailTemplates,
-  // notFoundTemplates,
+  detailTemplates,
+  notFoundTemplates,
 } from "./templates/index.js";
-import { getProducts, getCategories } from "./api/productApi.js";
+import { getProducts, getCategories, getProduct } from "./api/productApi.js";
 import { showToast } from "./util/commonUtils.js";
 
 const enableMocking = () =>
@@ -36,19 +36,32 @@ const state = {
   hasNext: true,
   hasPrev: false,
   isLoading: false,
+  detailProduct: {},
 };
 
 function initMain() {
-  init();
+  navigate();
+
+  // 뒤로가기 처리
+  window.addEventListener("popstate", () => {
+    navigate();
+  });
 }
 
-async function init() {
+async function navigate() {
   try {
-    renderLoading();
-
-    await Promise.all([loadCategories(), loadProducts()]);
-
-    renderInitialPage();
+    if (window.location.pathname === "/") {
+      renderLoading();
+      await Promise.all([loadCategories(), loadProducts()]);
+      renderInitialPage();
+    } else if (window.location.pathname.includes("/product/")) {
+      const productId = window.location.href.split("/product/").pop();
+      await loadDetailProduct(productId);
+      await loadRelatedProducts();
+      renderProductDetailPage();
+    } else {
+      render404Page();
+    }
   } catch (error) {
     console.error("초기화 실패:", error);
     renderError("데이터를 불러오는데 실패했습니다.");
@@ -97,6 +110,27 @@ async function loadCategories() {
   }
 }
 
+// 상품 상세 정보
+async function loadDetailProduct(productId) {
+  try {
+    const response = await getProduct(productId);
+    state.detailProduct = response;
+    console.log("상품 상세 정보 로드 완료:", state.detailProduct);
+  } catch (error) {
+    console.error("상품 상세 정보 로딩 실패:", error);
+  }
+}
+
+// 관련 상품 정보
+async function loadRelatedProducts() {
+  try {
+    const response = await getProducts({ category2: state.detailProduct.category2 });
+    state.relatedProducts = response.products;
+  } catch (error) {
+    console.error("관련 상품 정보 로딩 실패:", error);
+  }
+}
+
 function renderLoading() {
   const content = searchTemplates.filterBox() + commonTemplates.skeleton();
   document.body.innerHTML = layoutTemplates.page(content);
@@ -117,10 +151,21 @@ function renderInitialPage() {
 
   document.body.innerHTML = layoutTemplates.page(content, state.cart.length);
 
-  // 초기 렌더링 후 이벤트 리스너 등록 (한 번만)
   addEventListeners();
 }
 
+// 상세페이지 렌더링
+function renderProductDetailPage() {
+  document.body.innerHTML = detailTemplates.page(state.detailProduct, state.relatedProducts, state.cart.length);
+}
+
+// 404 페이지 렌더링
+function render404Page() {
+  const content = notFoundTemplates.page();
+  document.body.innerHTML = layoutTemplates.page(content, state.cart.length);
+}
+
+// 카테고리 필터 업데이트
 function updateCategorys() {
   const targetrDiv = document.getElementById("category-filters");
   const filters = state.filters;
@@ -310,6 +355,15 @@ function addEventListeners() {
     }
   });
 
+  // 상세페이지 이동 이벤트
+  document.body.addEventListener("click", async (event) => {
+    if (event.target.offsetParent.matches(".product-card") && !event.target.matches(".add-to-cart-btn")) {
+      const productId = event.target.offsetParent.getAttribute("data-product-id");
+      history.pushState(null, "", `/product/${productId}`);
+      navigate();
+    }
+  });
+
   // 무한 스크롤 이벤트
   window.addEventListener("scroll", async () => {
     const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
@@ -324,6 +378,14 @@ function addEventListeners() {
         updateProductList(true);
       }
     }
+  });
+
+  document.body.addEventListener("click", async (event) => {
+    if (!event.target.matches("a[data-link]")) return;
+
+    event.preventDefault();
+    history.pushState(null, "", "/");
+    navigate();
   });
 }
 
