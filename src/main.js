@@ -37,10 +37,12 @@ const state = {
   hasPrev: false,
   isLoading: false,
   detailProduct: {},
+  isMain: true,
 };
 
-function initMain() {
-  navigate();
+async function initMain() {
+  await Promise.all([navigate()]);
+  addEventListeners();
 
   // 뒤로가기 처리
   window.addEventListener("popstate", () => {
@@ -57,7 +59,7 @@ async function navigate() {
     } else if (window.location.pathname.includes("/product/")) {
       const productId = window.location.href.split("/product/").pop();
       await loadDetailProduct(productId);
-      await loadRelatedProducts();
+      await loadRelatedProducts(productId);
       renderProductDetailPage();
     } else {
       render404Page();
@@ -122,10 +124,10 @@ async function loadDetailProduct(productId) {
 }
 
 // 관련 상품 정보
-async function loadRelatedProducts() {
+async function loadRelatedProducts(productId = "") {
   try {
     const response = await getProducts({ category2: state.detailProduct.category2 });
-    state.relatedProducts = response.products;
+    state.relatedProducts = response.products.filter((p) => p.productId !== productId);
   } catch (error) {
     console.error("관련 상품 정보 로딩 실패:", error);
   }
@@ -133,7 +135,7 @@ async function loadRelatedProducts() {
 
 function renderLoading() {
   const content = searchTemplates.filterBox() + commonTemplates.skeleton();
-  document.body.innerHTML = layoutTemplates.page(content);
+  document.body.innerHTML = layoutTemplates.page(content, state.cart.length);
 }
 
 // 초기 렌더링: 전체 페이지 구조 (필터 + 상품 목록 컨테이너)
@@ -150,8 +152,6 @@ function renderInitialPage() {
   state.cart = localStorageCart ? JSON.parse(localStorageCart) : [];
 
   document.body.innerHTML = layoutTemplates.page(content, state.cart.length);
-
-  addEventListeners();
 }
 
 // 상세페이지 렌더링
@@ -267,9 +267,9 @@ function renderError(message) {
 // 이벤트 등록
 function addEventListeners() {
   // 검색 입력 이벤트
-  document.getElementById("search-input").addEventListener("keydown", async (event) => {
+  document.getElementById("search-input")?.addEventListener("keydown", async (event) => {
     if (event.key === "Enter") {
-      event.preventDefault();
+      event.defaultPrevented();
       const searchTerm = event.target.value.trim();
       state.currentPage = 1;
       state.filters.search = searchTerm;
@@ -280,6 +280,8 @@ function addEventListeners() {
 
   // 카테고리 필터 버튼 클릭 이벤트
   document.body.addEventListener("click", async (event) => {
+    event.stopPropagation();
+
     if (event.target.matches(".category-filter-btn")) {
       state.currentPage = 1;
 
@@ -299,17 +301,15 @@ function addEventListeners() {
 
   // 전체 클릭 시 리셋
   document.body.addEventListener("click", async (event) => {
-    if (event.target.matches("button[data-breadcrumb='reset']")) {
-      state.filters.category1 = "";
+    if (
+      event.target.matches("button[data-breadcrumb='reset']") ||
+      event.target.matches("button[data-breadcrumb='category1']")
+    ) {
+      event.stopPropagation();
+
+      state.filters.category1 = event.target.getAttribute("data-category1") || "";
       state.filters.category2 = "";
       state.filters.search = "";
-      state.currentPage = 1;
-      await Promise.all([loadProducts()]);
-      updateCategorys();
-      updateProductList();
-    } else if (event.target.matches("button[data-breadcrumb='category1']")) {
-      state.filters.category1 = event.target.getAttribute("data-category1");
-      state.filters.category2 = "";
       state.currentPage = 1;
       await Promise.all([loadProducts()]);
       updateCategorys();
@@ -318,8 +318,9 @@ function addEventListeners() {
   });
 
   // 페이지당 상품 수 변경 이벤트
-  document.getElementById("limit-select").addEventListener("change", async (event) => {
-    event.preventDefault();
+  document.getElementById("limit-select")?.addEventListener("change", async (event) => {
+    event.stopPropagation();
+
     const newLimit = parseInt(event.target.value, 10);
     state.filters.limit = newLimit;
     state.currentPage = 1;
@@ -328,8 +329,9 @@ function addEventListeners() {
   });
 
   // 정렬 변경 이벤트
-  document.getElementById("sort-select").addEventListener("change", async (event) => {
-    event.preventDefault();
+  document.getElementById("sort-select")?.addEventListener("change", async (event) => {
+    event.stopPropagation();
+
     const newSort = event.target.value;
     state.filters.sort = newSort;
     state.currentPage = 1;
@@ -339,6 +341,8 @@ function addEventListeners() {
 
   // 장바구니 담기 이벤트
   document.body.addEventListener("click", (event) => {
+    event.stopPropagation();
+
     if (event.target.matches(".add-to-cart-btn")) {
       const productId = event.target.getAttribute("data-product-id");
 
@@ -357,15 +361,49 @@ function addEventListeners() {
 
   // 상세페이지 이동 이벤트
   document.body.addEventListener("click", async (event) => {
-    if (event.target.offsetParent.matches(".product-card") && !event.target.matches(".add-to-cart-btn")) {
+    event.stopPropagation();
+    if (event.target.offsetParent?.matches(".product-card") && !event.target.matches(".add-to-cart-btn")) {
       const productId = event.target.offsetParent.getAttribute("data-product-id");
       history.pushState(null, "", `/product/${productId}`);
       navigate();
     }
   });
 
+  // 상세페이지에서 메인으로 이동 이벤트
+  document.body.addEventListener("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.target.parentElement.matches("#back-button")) {
+      state.currentPage = 1;
+      history.pushState(null, "", "/");
+      navigate();
+    }
+  });
+
+  // 관련 상품 상세페이지 이동 이벤트
+  document.body.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    if (event.target.offsetParent?.matches(".related-product-card")) {
+      const productId = event.target.offsetParent.getAttribute("data-product-id");
+      history.pushState(null, "", `/product/${productId}`);
+      navigate();
+    }
+  });
+
+  // 상품 목록으로 돌아가기 이벤트
+  document.body.addEventListener("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.target.matches(".go-to-product-list")) {
+      state.currentPage = 1;
+      history.pushState(null, "", "/");
+      navigate();
+    }
+  });
+
   // 무한 스크롤 이벤트
   window.addEventListener("scroll", async () => {
+    event.preventDefault();
     const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
     if (scrollTop + clientHeight >= scrollHeight - 100) {
       // 100px 남았을 때 다음 페이지 로드
@@ -381,6 +419,8 @@ function addEventListeners() {
   });
 
   document.body.addEventListener("click", async (event) => {
+    event.stopPropagation();
+
     if (!event.target.matches("a[data-link]")) return;
 
     event.preventDefault();

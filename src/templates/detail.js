@@ -16,7 +16,7 @@ export const detailTemplates = {
       <div class="max-w-md mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3">
-            <button onclick="window.history.back()" class="p-2 text-gray-700 hover:text-gray-900 transition-colors">
+            <button id="back-button" onclick="window.history.back()" class="p-2 text-gray-700 hover:text-gray-900 transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
               </svg>
@@ -107,7 +107,7 @@ export const detailTemplates = {
           
           <!-- 가격 -->
           <div class="mb-4">
-            <span class="text-2xl font-bold text-blue-600">${product.lprice.toLocaleString()}원</span>
+            <span class="text-2xl font-bold text-blue-600">${Number(product.lprice).toLocaleString()}원</span>
           </div>
           
           <!-- 재고 -->
@@ -152,9 +152,8 @@ export const detailTemplates = {
         </div>
         
         <!-- 액션 버튼 -->
-        <button id="add-to-cart-btn" 
-                data-product-id="${product.id}" 
-                class="w-full bg-blue-600 text-white py-3 px-4 rounded-md 
+        <button data-product-id="${product.productId}" 
+                class="add-to-cart-btn w-full bg-blue-600 text-white py-3 px-4 rounded-md 
                        hover:bg-blue-700 transition-colors font-medium">
           장바구니 담기
         </button>
