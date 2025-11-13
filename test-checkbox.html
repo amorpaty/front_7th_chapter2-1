@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<html>
+<body>
+<input type="checkbox" id="test1" class="test-checkbox">
+<input type="checkbox" id="test2" class="test-checkbox">
+
+<script>
+// change 이벤트
+document.querySelector('#test1').addEventListener('change', () => {
+  console.log('change 이벤트 발생!', document.querySelector('#test1').checked);
+});
+
+// click 이벤트
+document.querySelector('#test2').addEventListener('click', () => {
+  console.log('click 이벤트 발생!', document.querySelector('#test2').checked);
+});
+</script>
+</body>
+</html>
