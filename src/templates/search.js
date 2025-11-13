@@ -24,15 +24,16 @@ export const searchTemplates = {
       <div class="flex items-center gap-2">
         <label class="text-sm text-gray-600">카테고리:</label>
         <div id="category-breadcrumb" style="line-height: 0;">
-            <button data-breadcrumb="reset" class="text-xs hover:text-blue-800 hover:underline">전체</button>
-            ${category1 !== "" ? " > " + category1 : ""} ${category2 !== "" ? " > " + category2 : ""}
+          ${searchTemplates.breadcrumb(category1, category2)}
         </div>
       </div>
       <div id="category-filters" class="flex flex-wrap gap-2">
         ${
           categories.length == 0
             ? `<div class="text-sm text-gray-500 italic">카테고리 로딩 중...</div>`
-            : `${categories.map((category) => searchTemplates.categoryButton1(category)).join("")}`
+            : category1
+              ? `${categories.map((category) => searchTemplates.categoryButton2(category1, category, category === category2)).join("")}`
+              : `${categories.map((category) => searchTemplates.categoryButton1(category)).join("")}`
         }
       </div>
     </div>
@@ -51,10 +52,10 @@ export const searchTemplates = {
     </button>
   `,
 
-  categoryButton2: (category, isSelected = false) => /* html */ `
-    <button data-category2="${category}" class="category-filter-btn text-left px-3 py-2 text-sm rounded-md border transition-colors
-                   bg-white border-gray-300 ${isSelected ? "font-bold" : "text-gray-700"}  hover:text-blue-800 hover:underline">
-      ${category}
+  categoryButton2: (category1, category2, isSelected = false) => /* html */ `
+    <button data-category1="${category1}" data-category2="${category2}" class="category-filter-btn text-left px-3 py-2 text-sm rounded-md border transition-colors
+                   bg-white border-gray-300 ${isSelected ? "bg-blue-100 border-blue-300 text-blue-800" : "text-gray-700"}  hover:text-blue-800 hover:underline">
+      ${category2}
     </button>
   `,
 

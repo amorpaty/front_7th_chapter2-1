@@ -33,12 +33,16 @@ export const productTemplates = {
 
   list: (products) => {
     if (!products || products.length === 0) {
-      return '<p class="text-center py-20 text-gray-500">상품이 없습니다</p>';
+      return `<div id="product-list-container">
+                <p class="text-center py-20 text-gray-500">상품이 없습니다</p>
+              </div>`;
     }
 
     return /* html */ `
-      <div class="grid grid-cols-2 gap-4 mb-6" id="products-grid">
-        ${products.map((p) => productTemplates.card(p)).join("")}
+      <div id="product-list-container">
+        <div class="grid grid-cols-2 gap-4 mb-6" id="products-grid">
+          ${products.map((p) => productTemplates.card(p)).join("")}
+        </div>
       </div>
     `;
   },

@@ -4,7 +4,7 @@ import { commonTemplates } from "../templates";
 export function showToast(message, type = "success") {
   const toastHTML = commonTemplates.toast(message, type);
   const toastContainer = document.createElement("div");
-  toastContainer.className = "fixed top-4 right-4 z-50 transition-all duration-300";
+  toastContainer.className = "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300";
   toastContainer.innerHTML = toastHTML;
 
   document.body.appendChild(toastContainer);

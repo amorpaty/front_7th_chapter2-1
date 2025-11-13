@@ -38,10 +38,34 @@ export const store = new Store({
       state.cart = cart;
     },
 
-    ADD_TO_CART(state, productId) {
-      if (!state.cart.includes(productId)) {
-        state.cart.push(productId);
+    ADD_TO_CART(state, cartItem) {
+      // cartItem = { productId, quantity, name, price, image, ... }
+      const existingIndex = state.cart.findIndex((item) => item.productId === cartItem.productId);
+      if (existingIndex === -1) {
+        state.cart = [...state.cart, cartItem];
       }
+    },
+
+    UPDATE_CART_ITEM(state, { productId, quantity }) {
+      state.cart = state.cart.map((item) => (item.productId === productId ? { ...item, quantity } : item));
+    },
+
+    REMOVE_FROM_CART(state, productId) {
+      state.cart = state.cart.filter((item) => item.productId !== productId);
+    },
+
+    TOGGLE_CART_ITEM_SELECTED(state, productId) {
+      state.cart = state.cart.map((item) =>
+        item.productId === productId ? { ...item, selected: !item.selected } : item,
+      );
+    },
+
+    SET_CART_ITEM_SELECTED(state, { productId, selected }) {
+      state.cart = state.cart.map((item) => (item.productId === productId ? { ...item, selected } : item));
+    },
+
+    SELECT_ALL_CART_ITEMS(state, selected) {
+      state.cart = state.cart.map((item) => ({ ...item, selected }));
     },
 
     SET_FILTERS(state, filters) {
@@ -107,10 +131,9 @@ export const store = new Store({
         } else {
           commit("APPEND_PRODUCTS", response.products);
         }
-
-        commit("SET_TOTAL_COUNT", response.totalCount);
-        commit("SET_HAS_NEXT", response.hasNext);
-        commit("SET_HAS_PREV", response.hasPrev);
+        commit("SET_TOTAL_COUNT", response.pagination.total);
+        commit("SET_HAS_NEXT", response.pagination.hasNext);
+        commit("SET_HAS_PREV", response.pagination.hasPrev);
       } catch (error) {
         console.error("상품을 불러오는데 실패했습니다:", error);
       } finally {
@@ -126,6 +149,20 @@ export const store = new Store({
         commit("SET_IS_SUB_ITEM", false);
       } catch (error) {
         console.error("카테고리를 불러오는데 실패했습니다:", error);
+      }
+    },
+
+    async loadDetailProduct({ commit }, productId) {
+      commit("SET_IS_LOADING", true);
+      try {
+        const product = await getProduct(productId);
+        const relatedProducts = await getProducts({ category2: product.category2 });
+        commit("SET_DETAIL_PRODUCT", product);
+        commit("SET_RELATED_PRODUCTS", relatedProducts);
+      } catch (error) {
+        console.error("상품 상세를 불러오는데 실패했습니다:", error);
+      } finally {
+        commit("SET_IS_LOADING", false);
       }
     },
 
@@ -147,11 +184,30 @@ export const store = new Store({
       commit("SET_CART", cart);
     },
 
-    addToCart({ commit, state }, productId) {
-      if (state.cart.includes(productId)) {
+    addToCart({ commit, state }, { productId, quantity, product }) {
+      // 같은 상품, 같은 수량이 이미 있으면 추가하지 않음
+      const existingItem = state.cart.find((item) => item.productId === productId);
+
+      if (existingItem && existingItem.quantity === quantity) {
         return false;
       }
-      commit("ADD_TO_CART", productId);
+
+      if (existingItem) {
+        // 수량만 업데이트
+        commit("UPDATE_CART_ITEM", { productId, quantity });
+      } else {
+        // 새 아이템 추가 - 전체 상품 정보 저장
+        const cartItem = {
+          productId: product.productId,
+          name: product.title || product.name,
+          price: parseInt(product.lprice),
+          image: product.image,
+          quantity: quantity,
+          selected: false,
+        };
+        commit("ADD_TO_CART", cartItem);
+      }
+
       window.localStorage.setItem("shopping_cart", JSON.stringify(state.cart));
       return true;
     },

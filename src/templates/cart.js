@@ -1,37 +1,39 @@
 // 장바구니 모달 템플릿
 export const cartTemplates = {
   empty: () => /* html */ `
-    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
-      <div class="relative bg-white rounded-t-lg sm:rounded-lg shadow-xl w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-hidden">
-        <!-- 헤더 -->
-        <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900 flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 2H3m4 11v6a1 1 0 001 1h1a1 1 0 001-1v-6M13 13v6a1 1 0 001 1h1a1 1 0 001-1v-6"></path>
-            </svg>
-            장바구니 
-          </h2>
-          <button id="cart-modal-close-btn" class="text-gray-400 hover:text-gray-600 p-1">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-        
-        <!-- 컨텐츠 -->
-        <div class="flex flex-col max-h-[calc(90vh-120px)]">
-          <!-- 빈 장바구니 -->
-          <div class="flex-1 flex items-center justify-center p-8">
-            <div class="text-center">
-              <div class="text-gray-400 mb-4">
-                <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                        d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 2H3m4 11v6a1 1 0 001 1h1a1 1 0 001-1v-6M13 13v6a1 1 0 001 1h1a1 1 0 001-1v-6"></path>
-                </svg>
+    <div class="cart-modal-overlay fixed inset-0 bg-black bg-opacity-50 z-50">
+      <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
+        <div class="relative bg-white rounded-t-lg sm:rounded-lg shadow-xl w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-hidden">
+          <!-- 헤더 -->
+          <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 2H3m4 11v6a1 1 0 001 1h1a1 1 0 001-1v-6M13 13v6a1 1 0 001 1h1a1 1 0 001-1v-6"></path>
+              </svg>
+              장바구니 
+            </h2>
+            <button id="cart-modal-close-btn" class="text-gray-400 hover:text-gray-600 p-1">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- 컨텐츠 -->
+          <div class="flex flex-col max-h-[calc(90vh-120px)]">
+            <!-- 빈 장바구니 -->
+            <div class="flex-1 flex items-center justify-center p-8">
+              <div class="text-center">
+                <div class="text-gray-400 mb-4">
+                  <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 2H3m4 11v6a1 1 0 001 1h1a1 1 0 001-1v-6M13 13v6a1 1 0 001 1h1a1 1 0 001-1v-6"></path>
+                  </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">장바구니가 비어있습니다</h3>
+                <p class="text-gray-600">원하는 상품을 담아보세요!</p>
               </div>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">장바구니가 비어있습니다</h3>
-              <p class="text-gray-600">원하는 상품을 담아보세요!</p>
             </div>
           </div>
         </div>
@@ -42,11 +44,12 @@ export const cartTemplates = {
   item: (item) => /* html */ `
     <div class="flex items-center py-3 border-b border-gray-100 cart-item" data-product-id="${item.id}">
       <!-- 선택 체크박스 -->
-      <label class="flex items-center mr-3">
+      <div class="flex items-center justify-center mr-3 flex-shrink-0">
         <input type="checkbox" 
-               class="cart-item-checkbox w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" 
-               data-product-id="${item.id}">
-      </label>
+               class="cart-item-checkbox w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer" 
+               data-product-id="${item.id}"
+               ${item.selected ? "checked" : ""}>
+      </div>
       <!-- 상품 이미지 -->
       <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-3 flex-shrink-0">
         <img src="${item.image}" 
@@ -90,7 +93,7 @@ export const cartTemplates = {
       </div>
       <!-- 가격 및 삭제 -->
       <div class="text-right ml-3">
-        <p class="text-sm font-medium text-gray-900">
+        <p class="text-sm font-medium text-gray-900 cart-item-total-price">
           ${(item.price * item.quantity).toLocaleString()}원
         </p>
         <button class="cart-item-remove-btn mt-1 text-xs text-red-600 hover:text-red-800" 
@@ -135,11 +138,11 @@ export const cartTemplates = {
             <div class="flex flex-col max-h-[calc(90vh-120px)]">
               <!-- 전체 선택 섹션 -->
               <div class="p-4 border-b border-gray-200 bg-gray-50">
-                <label class="flex items-center text-sm text-gray-700">
+                <label class="flex items-center text-sm text-gray-700 cursor-pointer select-none">
                   <input type="checkbox" 
                          id="cart-modal-select-all-checkbox" 
-                         class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2">
-                  전체선택 (${cartItems.length}개)
+                         class="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 mr-3 cursor-pointer flex-shrink-0">
+                  <span>전체선택 (${cartItems.length}개)</span>
                 </label>
               </div>
               
@@ -158,7 +161,7 @@ export const cartTemplates = {
                   ? /* html */ `
                 <div class="flex justify-between items-center mb-3 text-sm">
                   <span class="text-gray-600">선택한 상품 (${selectedItems.length}개)</span>
-                  <span class="font-medium">${selectedTotal.toLocaleString()}원</span>
+                  <span class="font-medium cart-modal-selected-total">${selectedTotal.toLocaleString()}원</span>
                 </div>
               `
                   : ""
@@ -166,8 +169,7 @@ export const cartTemplates = {
               
               <!-- 총 금액 -->
               <div class="flex justify-between items-center mb-4">
-                <span class="text-lg font-bold text-gray-900">총 금액</span>
-                <span class="text-xl font-bold text-blue-600">${total.toLocaleString()}원</span>
+                <span class="text-lg font-bold text-gray-900">총 금액 <span class="text-xl text-blue-600 cart-modal-total-price">${total.toLocaleString()}원</span></span>
               </div>
               
               <!-- 액션 버튼들 -->

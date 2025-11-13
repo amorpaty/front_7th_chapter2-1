@@ -11,7 +11,7 @@ export const detailTemplates = {
     </div>
   `,
 
-  header: (cartCount = 0) => /* html */ `
+  header: () => /* html */ `
     <header class="bg-white shadow-sm sticky top-0 z-40">
       <div class="max-w-md mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
@@ -24,21 +24,12 @@ export const detailTemplates = {
             <h1 class="text-lg font-bold text-gray-900">상품 상세</h1>
           </div>
           <div class="flex items-center space-x-2">
-            <!-- 장바구니 아이콘 -->
+            <!-- 장바구니 아이콘 (Observer가 배지 추가) -->
             <button id="cart-icon-btn" class="relative p-2 text-gray-700 hover:text-gray-900 transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 2H3m4 11v6a1 1 0 001 1h1a1 1 0 001-1v-6M13 13v6a1 1 0 001 1h1a1 1 0 001-1v-6"></path>
               </svg>
-              ${
-                cartCount > 0
-                  ? `
-                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  ${cartCount}
-                </span>
-              `
-                  : ""
-              }
             </button>
           </div>
         </div>
@@ -62,7 +53,7 @@ export const detailTemplates = {
           <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
           </svg>
-          <button class="breadcrumb-link hover:text-blue-600" data-category2="${product.category2}">
+          <button class="breadcrumb-link hover:text-blue-600" data-category1="${product.category1}" data-category2="${product.category2}">
             ${product.category2}
           </button>
         `
@@ -152,7 +143,7 @@ export const detailTemplates = {
         </div>
         
         <!-- 액션 버튼 -->
-        <button data-product-id="${product.productId}" 
+        <button data-product-id="${product.productId}" id="add-to-cart-btn"
                 class="add-to-cart-btn w-full bg-blue-600 text-white py-3 px-4 rounded-md 
                        hover:bg-blue-700 transition-colors font-medium">
           장바구니 담기
@@ -200,9 +191,9 @@ export const detailTemplates = {
     </div>
   `,
 
-  page: (product, relatedProducts = [], cartCount) => /* html */ `
+  page: (product, relatedProducts = []) => /* html */ `
     <div class="min-h-screen bg-gray-50">
-      ${detailTemplates.header(cartCount)}
+      ${detailTemplates.header()}
       <main class="max-w-md mx-auto px-4 py-4">
         ${detailTemplates.breadcrumb(product)}
         ${detailTemplates.productInfo(product)}
