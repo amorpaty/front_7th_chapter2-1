@@ -45,8 +45,8 @@ export function buildMainPageUrl(filters = {}) {
   if (filters.category1) params.category1 = filters.category1;
   if (filters.category2) params.category2 = filters.category2;
   if (filters.search) params.search = filters.search;
-  if (filters.sort && filters.sort !== "price_asc") params.sort = filters.sort; // 기본값이 아닐 때만
-  if (filters.limit && filters.limit !== 20) params.limit = filters.limit; // 기본값이 아닐 때만
+  if (filters.sort) params.sort = filters.sort;
+  if (filters.limit) params.limit = filters.limit;
 
   const queryString = buildQueryString(params);
   // BASE_URL이 /로 끝나므로 /를 제거한 후 쿼리스트링 추가

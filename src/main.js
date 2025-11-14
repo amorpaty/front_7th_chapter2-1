@@ -62,12 +62,13 @@ async function initMain() {
 function setupObservers() {
   // 상품 목록 업데이트 관찰
   observe(() => {
-    const productListContainer = document.getElementById("product-list-container");
-    if (productListContainer && store.state.products) {
-      const content = `
-        ${productTemplates.list(store.state.products)}
-        `;
-      productListContainer.innerHTML = content;
+    const productsGrid = document.getElementById("products-grid");
+    if (productsGrid && store.state.products !== undefined) {
+      const content =
+        !store.state.products || store.state.products.length === 0
+          ? '<div class="col-span-2"><p class="text-center py-20 text-gray-500">상품이 없습니다</p></div>'
+          : store.state.products.map((p) => productTemplates.card(p)).join("");
+      productsGrid.innerHTML = content;
     }
   });
 
@@ -217,7 +218,11 @@ function showLoadingState() {
         
         <!-- 상품 목록 스켈레톤 -->
         <div class="max-w-7xl mx-auto px-4">
-          ${commonTemplates.skeleton(8)}
+          <div id="product-list-container">
+            <div class="grid grid-cols-2 gap-4 mb-6" id="products-grid" data-testid="products-grid">
+              ${commonTemplates.skeleton(8)}
+            </div>
+          </div>
         </div>
       </div>
     `,
@@ -792,12 +797,14 @@ function addEventListeners() {
   // 검색 입력 이벤트 (이벤트 위임 사용)
   document.body.addEventListener("keydown", async (event) => {
     if (event.target.matches("#search-input") && event.key === "Enter") {
+      event.preventDefault();
       const searchTerm = event.target.value.trim();
       store.commit("SET_CURRENT_PAGE", 1);
       store.commit("SET_FILTERS", { search: searchTerm });
       updateUrlWithFilters(store.state.filters);
 
       await store.dispatch("loadProducts");
+      renderMainPage();
     }
   });
 
@@ -823,6 +830,7 @@ function addEventListeners() {
       updateUrlWithFilters(store.state.filters);
 
       await store.dispatch("loadProducts");
+      renderMainPage();
     }
   });
 
@@ -843,6 +851,7 @@ function addEventListeners() {
 
       updateUrlWithFilters(store.state.filters);
       await store.dispatch("loadProducts");
+      renderMainPage();
     }
   });
 
@@ -858,6 +867,7 @@ function addEventListeners() {
 
       updateUrlWithFilters(store.state.filters);
       await store.dispatch("loadProducts");
+      renderMainPage();
       return;
     }
 
@@ -871,6 +881,7 @@ function addEventListeners() {
 
       updateUrlWithFilters(store.state.filters);
       await store.dispatch("loadProducts");
+      renderMainPage();
       return;
     }
 
@@ -1094,6 +1105,7 @@ function addEventListeners() {
         store.commit("SET_CURRENT_PAGE", store.state.currentPage + 1);
         showInfiniteScrollLoader();
         await store.dispatch("loadProducts");
+        renderMainPage();
         removeInfiniteScrollLoader();
       }
     }
@@ -1193,7 +1205,7 @@ function main() {
         <div class="mb-6">
           <div>
             <!-- 상품 그리드 -->
-            <div class="grid grid-cols-2 gap-4 mb-6" id="products-grid">
+            <div class="grid grid-cols-2 gap-4 mb-6" id="products-grid" data-testid="products-grid">
               <!-- 로딩 스켈레톤 -->
               <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse">
                 <div class="aspect-square bg-gray-200"></div>
@@ -1356,7 +1368,7 @@ function main() {
               총 <span class="font-medium text-gray-900">340개</span>의 상품
             </div>
             <!-- 상품 그리드 -->
-            <div class="grid grid-cols-2 gap-4 mb-6" id="products-grid">
+            <div class="grid grid-cols-2 gap-4 mb-6" id="products-grid" data-testid="products-grid">
               <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden product-card"
                    data-product-id="85067212996">
                 <!-- 상품 이미지 -->
