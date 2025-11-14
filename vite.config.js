@@ -1,6 +1,11 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  base: "/front_7th_chapter2-1/",
+  build: {
+    outDir: "dist",
+    assetsDir: "assets",
+  },
   test: {
     globals: true,
     environment: "jsdom",

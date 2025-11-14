@@ -2,6 +2,9 @@
  * URL 관련 유틸리티 함수들
  */
 
+// GitHub Pages 배포를 위한 base URL
+const BASE_URL = import.meta.env.BASE_URL || "/";
+
 /**
  * 현재 URL의 쿼리 파라미터를 객체로 반환
  * @returns {Object} 쿼리 파라미터 객체
@@ -45,7 +48,10 @@ export function buildMainPageUrl(filters = {}) {
   if (filters.sort && filters.sort !== "price_asc") params.sort = filters.sort; // 기본값이 아닐 때만
   if (filters.limit && filters.limit !== 20) params.limit = filters.limit; // 기본값이 아닐 때만
 
-  return "/" + buildQueryString(params);
+  const queryString = buildQueryString(params);
+  // BASE_URL이 /로 끝나므로 /를 제거한 후 쿼리스트링 추가
+  const basePath = BASE_URL === "/" ? "/" : BASE_URL.slice(0, -1);
+  return basePath + queryString;
 }
 
 /**
@@ -54,7 +60,7 @@ export function buildMainPageUrl(filters = {}) {
  * @returns {string} URL
  */
 export function buildProductDetailUrl(productId) {
-  return `/product/${productId}`;
+  return `${BASE_URL}product/${productId}`;
 }
 
 /**
@@ -62,7 +68,8 @@ export function buildProductDetailUrl(productId) {
  * @returns {boolean}
  */
 export function isMainPage() {
-  return window.location.pathname === "/";
+  const pathname = window.location.pathname;
+  return pathname === BASE_URL || pathname === BASE_URL.slice(0, -1);
 }
 
 /**
@@ -79,7 +86,8 @@ export function isProductDetailPage() {
  */
 export function getProductIdFromUrl() {
   if (!isProductDetailPage()) return null;
-  return window.location.pathname.split("/product/")[1];
+  const parts = window.location.pathname.split("/product/");
+  return parts[parts.length - 1];
 }
 
 /**
